@@ -35,16 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Course data (now only by module title)
     // This can be fetched from backend if dynamic
     const courseModules = [
-        'Introduction to NEBOSH and Health & Safety Foundations',
-        'Health & Safety Management Systems (Plan)',
-        'Health & Safety Management Systems (Do)',
-        'Risk Assessment Principles and Application',
-        'Identifying and Controlling Workplace Hazards',
-        'Physical and Psychological Health Hazards',
-        'Fire, Electrical, and Chemical Safety Management',
-        'Monitoring, Reviewing, and Incident Investigation',
-        'Exam Preparation and Practical Assessment Guidelines',
-        'NEBOSH Practical Assessment and Course Wrap-Up'
+        '1 Why we should manage workplace health and safety ',
+        '2 How health and safety management systems work and what they look like',
+        '3 Managing risk - understanding people and process',
+        '4 Health and safety monitoring and measuring ',
+        '5 Physical and psychological health',
+        '6 Musculoskeletal health ',
+        '7 Chemical and biological agents',
+        '8 General  workplace issues',
+        '9 Work equipment ',
+        '10 Fire'
     ];
 
     // Populate Module Title dropdown

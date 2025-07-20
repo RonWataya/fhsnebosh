@@ -145,7 +145,7 @@ async function fetchLearnerDetails(id) {
         li.innerHTML = `
           ${r.signatures.signature1 ? `<img src="${r.signatures.signature1}" class="me-2" style="max-width:60px;">` : '<span class="text-muted me-2">No Sig</span>'}
           <div>
-            <strong>${r.moduleTitle}</strong> - Day ${r.moduleDay}<br>
+            <strong>${r.moduleTitle}</strong>  ${r.moduleDay}<br>
             <small>${new Date(r.attendanceDate).toLocaleDateString()}</small>
           </div>
           <div class="ms-auto">${badgeHTML}</div>

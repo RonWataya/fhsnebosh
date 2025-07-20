@@ -2,49 +2,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const learnerNameInput = document.getElementById('learnerName');
     const learnerIdInput = document.getElementById('learnerId');
     const nameSuggestionsDiv = document.getElementById('nameSuggestions');
-    const moduleTitleSelect = document.getElementById('moduleTitle'); // Changed ID to moduleTitle
-    const attendanceDateInput = document.getElementById('attendanceDate'); // Keeping this to record when the signature was made
-    const sessionSignersContainer = document.getElementById('sessionSigners').querySelector('.row'); // Parent for session blocks
+    const moduleTitleSelect = document.getElementById('moduleTitle');
+    const attendanceDateInput = document.getElementById('attendanceDate');
+    const sessionSignersContainer = document.getElementById('sessionSigners').querySelector('.row');
     const statusMessageDiv = document.getElementById('statusMessage');
 
-    // Signature Modal Elements
     const signatureModal = document.getElementById('signatureModal');
     const signatureCanvas = document.getElementById('signatureCanvas');
     const clearSignatureBtn = document.getElementById('clearSignature');
     const saveSignatureBtn = document.getElementById('saveSignature');
     let signaturePad = new SignaturePad(signatureCanvas);
-    let currentSessionNumToSign = null; // To track which session is being signed
+    let currentSessionNumToSign = null;
 
-    // IMPORTANT CHANGE: Initialize the Bootstrap modal instance ONCE here
     const bsModalInstance = new bootstrap.Modal(signatureModal);
 
     signatureModal.addEventListener('shown.bs.modal', () => {
-        // Resize canvas when modal opens to ensure correct drawing area
         const parent = signatureCanvas.parentElement;
         signatureCanvas.width = parent.clientWidth;
-        signatureCanvas.height = 200; // Fixed height for consistency, adjust as needed
-        signaturePad.clear(); // Clear previous drawing
-        signaturePad.on(); // Enable drawing
+        signatureCanvas.height = 200;
+        signaturePad.clear();
+        signaturePad.on();
     });
 
     signatureModal.addEventListener('hidden.bs.modal', () => {
-        signaturePad.off(); // Disable drawing when modal is hidden
-        signaturePad.clear(); // IMPORTANT: Clear the pad when modal closes
+        signaturePad.off();
+        signaturePad.clear();
     });
 
-    // Course data (now only by module title)
-    // This can be fetched from backend if dynamic
+    // Course data: Store objects with both full display text and clean name for backend
     const courseModules = [
-        '1 Why we should manage workplace health and safety ',
-        '2 How health and safety management systems work and what they look like',
-        '3 Managing risk - understanding people and process',
-        '4 Health and safety monitoring and measuring ',
-        '5 Physical and psychological health',
-        '6 Musculoskeletal health ',
-        '7 Chemical and biological agents',
-        '8 General  workplace issues',
-        '9 Work equipment ',
-        '10 Fire'
+        { display: '1 Why we should manage workplace health and safety', value: 'Why we should manage workplace health and safety' },
+        { display: '2 How health and safety management systems work and what they look like', value: 'How health and safety management systems work and what they look like' },
+        { display: '3 Managing risk - understanding people and process', value: 'Managing risk - understanding people and process' },
+        { display: '4 Health and safety monitoring and measuring', value: 'Health and safety monitoring and measuring' },
+        { display: '5 Physical and psychological health', value: 'Physical and psychological health' },
+        { display: '6 Musculoskeletal health', value: 'Musculoskeletal health' },
+        { display: '7 Chemical and biological agents', value: 'Chemical and biological agents' },
+        { display: '8 General workplace issues', value: 'General workplace issues' },
+        { display: '9 Work equipment', value: 'Work equipment' },
+        { display: '10 Fire', value: 'Fire' }
     ];
 
     // Populate Module Title dropdown
@@ -52,17 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
         moduleTitleSelect.innerHTML = '<option value="">-- Select Module --</option>';
         courseModules.forEach((item) => {
             const option = document.createElement('option');
-            option.value = item; // Use the full module title as value
-            option.textContent = item;
+            option.value = item.value; // Send this to the backend (no number)
+            option.textContent = item.display; // Show this in the dropdown (with number)
             moduleTitleSelect.appendChild(option);
         });
     }
     populateModuleTitles();
 
-    // --- Signature Pad Modal Logic ---
     function openSignatureModal(sessionNum) {
         currentSessionNumToSign = sessionNum;
-        bsModalInstance.show(); // IMPORTANT CHANGE: Use the initialized Bootstrap modal instance to show
+        bsModalInstance.show();
     }
 
     clearSignatureBtn.addEventListener('click', () => {
@@ -77,17 +72,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const learnerName = learnerNameInput.value.trim();
         const learnerId = learnerIdInput.value;
-        const attendanceDate = attendanceDateInput.value; // Date of signing
-        const moduleTitle = moduleTitleSelect.value; // Get selected module title
+        const attendanceDate = attendanceDateInput.value;
+        const moduleTitle = moduleTitleSelect.value; // This will now correctly be the value without the number
 
-        // Basic validation before sending signature
         if (!learnerName || !attendanceDate || !moduleTitle) {
             displayStatus('Please fill in Learner Name, Date, and Module Title before signing.', 'danger');
-            bsModalInstance.hide(); // Hide modal if validation fails
+            bsModalInstance.hide();
             return;
         }
 
-        const signatureData = signaturePad.toDataURL('image/png'); // Base64 image
+        const signatureData = signaturePad.toDataURL('image/png');
 
         displayStatus(`Signing for Session ${currentSessionNumToSign}...`, 'info');
 
@@ -99,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     learnerName,
                     learnerId,
                     attendanceDate,
-                    moduleTitle, // moduleDay removed
+                    moduleTitle, // This now sends the value (e.g., "Why we should manage...")
                     sessionNum: currentSessionNumToSign,
                     signatureData
                 })
@@ -108,13 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const result = await response.json();
                 displayStatus(result.message || `Session ${currentSessionNumToSign} signed successfully!`, 'success');
-                bsModalInstance.hide(); // Hide modal on success
-                // After successful sign, re-fetch attendance to update UI
-                // IMPORTANT: Update learnerIdInput if a new learner was created on the backend
+                bsModalInstance.hide();
                 if (result.learnerId && learnerIdInput.value === 'NEW') {
                     learnerIdInput.value = result.learnerId;
                 }
-                fetchAttendanceForLearnerModule(); // Call the updated fetch function
+                fetchAttendanceForLearnerModule();
             } else {
                 const errorData = await response.json();
                 displayStatus(`Failed to sign session: ${errorData.message || response.statusText}`, 'danger');
@@ -127,16 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Autocomplete Logic ---
-    let currentFocus = -1; // Global variable for active autocomplete item
+    // --- Autocomplete Logic (No changes needed here for module names) ---
+    let currentFocus = -1;
 
     learnerNameInput.addEventListener('input', async function() {
         const query = this.value.trim();
-        closeAllLists(); // Close any existing lists
+        closeAllLists();
 
         if (!query || query.length < 2) {
-            learnerIdInput.value = 'NEW'; // Reset to NEW if input is cleared or too short
-            // Also clear attendance status when learner name is cleared
+            learnerIdInput.value = 'NEW';
             renderSessionSigners({});
             return;
         }
@@ -146,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to fetch learners');
             const learners = await response.json();
 
-            nameSuggestionsDiv.innerHTML = ''; // Clear existing suggestions
+            nameSuggestionsDiv.innerHTML = '';
             if (learners.length === 0) {
                 nameSuggestionsDiv.style.display = 'none';
                 return;
@@ -163,12 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     learnerNameInput.value = this.getElementsByTagName("input")[0].value;
                     learnerIdInput.value = this.getElementsByTagName("input")[0].dataset.learnerId;
                     closeAllLists();
-                    // After selecting a learner, try to fetch their current module's attendance
-                    fetchAttendanceForLearnerModule(); // Call the updated fetch function
+                    fetchAttendanceForLearnerModule();
                 });
                 nameSuggestionsDiv.appendChild(btn);
             });
-            nameSuggestionsDiv.style.display = 'block'; // Show the suggestions container
+            nameSuggestionsDiv.style.display = 'block';
         } catch (error) {
             console.error('Error fetching autocomplete suggestions:', error);
             nameSuggestionsDiv.innerHTML = '';
@@ -180,13 +170,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let x = nameSuggestionsDiv.getElementsByTagName("button");
         if (x.length === 0) return;
 
-        if (e.keyCode == 40) { // Down arrow
+        if (e.keyCode == 40) {
             currentFocus++;
             addActive(x);
-        } else if (e.keyCode == 38) { // Up arrow
+        } else if (e.keyCode == 38) {
             currentFocus--;
             addActive(x);
-        } else if (e.keyCode == 13) { // Enter key
+        } else if (e.keyCode == 13) {
             e.preventDefault();
             if (currentFocus > -1 && x[currentFocus]) {
                 x[currentFocus].click();
@@ -212,8 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const x = document.getElementsByClassName("autocomplete-items");
         for (let i = 0; i < x.length; i++) {
             if (elmnt != x[i] && elmnt != learnerNameInput) {
-                x[i].innerHTML = ''; // Clear content
-                x[i].style.display = 'none'; // Hide
+                x[i].innerHTML = '';
+                x[i].style.display = 'none';
             }
         }
         currentFocus = -1;
@@ -222,27 +212,26 @@ document.addEventListener('DOMContentLoaded', () => {
         closeAllLists(e.target);
     });
 
-    // --- Dynamic Session Signer Blocks & Status Update (UNCHANGED LOGIC) ---
+    // --- Dynamic Session Signer Blocks & Status Update (No changes needed here) ---
     function renderSessionSigners(currentSignatures = {}) {
-        sessionSignersContainer.innerHTML = ''; // Clear previous
+        sessionSignersContainer.innerHTML = '';
         for (let i = 1; i <= 4; i++) {
             const signatureKey = `signature${i}`;
             const isSignedKey = `is_signed${i}`;
-            
-            // Determine signed status using the new is_signedX flag
+
             const isSigned = currentSignatures[isSignedKey] === 1;
             const signatureData = currentSignatures[signatureKey];
 
             const colDiv = document.createElement('div');
-            colDiv.classList.add('col-12', 'col-md-6', 'col-lg-3'); // Responsive columns
+            colDiv.classList.add('col-12', 'col-md-6', 'col-lg-3');
 
             const sessionBlock = document.createElement('div');
             sessionBlock.classList.add('session-signer-block', 'p-3', 'shadow-sm', 'h-100');
-            
+
             let isDisabled = false;
-            if (i > 1) { // For sessions after the first one
+            if (i > 1) {
                 const prevIsSignedKey = `is_signed${i-1}`;
-                if (currentSignatures[prevIsSignedKey] !== 1) { // If previous session is NOT signed
+                if (currentSignatures[prevIsSignedKey] !== 1) {
                     isDisabled = true;
                 }
             }
@@ -255,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             sessionBlock.innerHTML = `
                 <h5>Session ${i}</h5>
-                ${isSigned ? 
+                ${isSigned ?
                     `<img src="${signatureData}" class="signature-display-thumb" alt="Signature ${i}">
                      <span class="text-success-status mt-2">Signed!</span>`
                     : `<button type="button" class="btn btn-primary btn-sign-session mt-2" data-session-num="${i}" ${isDisabled ? 'disabled' : ''}>Sign Now</button>`
@@ -265,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionSignersContainer.appendChild(colDiv);
         }
 
-        // Attach click listeners to new sign buttons
         sessionSignersContainer.querySelectorAll('.btn-sign-session').forEach(button => {
             button.addEventListener('click', (event) => {
                 const sessionNum = event.target.dataset.sessionNum;
@@ -274,12 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Function to fetch attendance status for selected learner/module (MODIFIED)
-    async function fetchAttendanceForLearnerModule() { // Renamed function
+    // Function to fetch attendance status for selected learner/module (No changes needed here)
+    async function fetchAttendanceForLearnerModule() {
         const learnerId = learnerIdInput.value;
-        const moduleTitle = moduleTitleSelect.value; // Fetch by module title
+        const moduleTitle = moduleTitleSelect.value;
 
-        // Basic validation for form fields before fetching
         const learnerName = learnerNameInput.value.trim();
         let isValid = true;
         if (!learnerName) {
@@ -294,13 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             moduleTitleSelect.classList.remove('is-invalid');
         }
-        // attendanceDate is no longer part of the lookup, so it doesn't need validation here
-        // if (!attendanceDateInput.value) { /* ... */ }
-
 
         if (!isValid || learnerId === 'NEW') {
-            // If validation fails or it's a new learner, clear or reset session blocks.
-            // A 'NEW' learner cannot have existing signatures for this day yet.
             renderSessionSigners({});
             return;
         }
@@ -308,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
         displayStatus('Fetching existing signatures for module...', 'info');
 
         try {
-            // Changed API endpoint and parameters
             const response = await fetch(`https://traininghealthandsafety.com:3000/api/attendance/learner-module?learnerId=${learnerId}&moduleTitle=${encodeURIComponent(moduleTitle)}`);
             if (response.ok) {
                 const data = await response.json();
@@ -316,46 +297,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderSessionSigners(data);
                     displayStatus('Existing signatures loaded.', 'success');
                 } else {
-                    renderSessionSigners({}); // No record found, enable session 1
+                    renderSessionSigners({});
                     displayStatus('No existing signatures found for this module for this learner.', 'secondary');
                 }
             } else {
                 console.error('Failed to fetch existing attendance:', response.statusText);
-                renderSessionSigners({}); // Reset on error
+                renderSessionSigners({});
                 displayStatus('Error fetching existing signatures.', 'danger');
             }
         } catch (error) {
             console.error('Error fetching existing attendance:', error);
-            renderSessionSigners({}); // Reset on network error
+            renderSessionSigners({});
             displayStatus('Network error fetching existing signatures.', 'danger');
         }
     }
 
-    // Event listeners for changes in primary fields to trigger attendance status fetch
     learnerNameInput.addEventListener('change', () => {
         if (learnerIdInput.value !== 'NEW' || learnerNameInput.value.trim() === '') {
-            fetchAttendanceForLearnerModule(); // Call updated function
+            fetchAttendanceForLearnerModule();
         }
     });
-    // attendanceDateInput no longer triggers fetch for unique lookup
-    moduleTitleSelect.addEventListener('change', fetchAttendanceForLearnerModule); // Call updated function
 
+    moduleTitleSelect.addEventListener('change', fetchAttendanceForLearnerModule);
 
-    // Helper function to display status messages
     function displayStatus(message, type) {
         statusMessageDiv.textContent = message;
         statusMessageDiv.className = `mt-4 alert alert-${type}`;
         statusMessageDiv.style.display = 'block';
         setTimeout(() => {
             statusMessageDiv.style.display = 'none';
-        }, 5000); // Hide after 5 seconds
+        }, 5000);
     }
 
-    // Initial load logic: If form fields are pre-filled (e.g., browser autocomplete on refresh),
-    // attempt to fetch existing attendance. Otherwise, render empty session blocks.
-    // Check for moduleTitle instead of moduleDay
     if (learnerNameInput.value && moduleTitleSelect.value && learnerIdInput.value !== 'NEW') {
-        fetchAttendanceForLearnerModule(); // Call updated function
+        fetchAttendanceForLearnerModule();
     } else {
         renderSessionSigners({});
     }

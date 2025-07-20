@@ -1,0 +1,14 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# If the request is not for a real file (e.g., image, css, js)
+RewriteCond %{REQUEST_FILENAME} !-f
+# And if the request is not for a real directory
+RewriteCond %{REQUEST_FILENAME} !-d
+# And if the request does NOT end with a slash (to avoid rewriting directory requests twice)
+RewriteCond %{REQUEST_URI} !(/)$
+# And if the request does NOT already contain a dot (to avoid rewriting files like styles.css)
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]+$
+# Then internally rewrite the URL to add .html
+# This rule will internally rewrite /my-page to /my-page.html
+RewriteRule ^(.*)$ $1.html [L]

@@ -1,0 +1,104 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.logo-container {
+  width: 100%;
+  text-align: center;
+  padding: 20px 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.logo-container img {
+  max-width: 150px;
+  height: auto;
+}
+
+.page-title {
+  color: #343a40;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+.footer {
+  width: 100%;
+  padding: 15px;
+  text-align: center;
+  background-color: #343a40;
+  color: white;
+  margin-top: auto;
+}
+
+.hidden {
+  display: none;
+}
+
+.signature-img-small {
+  max-width: 80px;
+  height: auto;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.attendance-list-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.attendance-list-item strong {
+  margin-right: 5px;
+}
+
+.attendance-list-content {
+  flex-grow: 1;
+}
+
+.attendance-status {
+  margin-left: auto;
+  padding-left: 15px;
+}
+
+.scrollable-content {
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 15px;
+  background-color: #ffffff;
+}
+
+.table-card {
+  border: 1px solid #e9ecef;
+  border-radius: var(--bs-card-border-radius);
+  overflow: hidden;
+  box-shadow: var(--bs-card-box-shadow);
+}
+
+.table a.view-learner-details {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.table a.view-learner-details:hover {
+  text-decoration: underline;
+  color: #0d6efd;
+}

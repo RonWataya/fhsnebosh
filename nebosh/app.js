@@ -30,17 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Course data: Store objects with both full display text and clean name for backend
+    // MODIFICATION HERE: Set value to display text (which includes the number)
     const courseModules = [
-        { display: '1 Why we should manage workplace health and safety', value: 'Why we should manage workplace health and safety' },
-        { display: '2 How health and safety management systems work and what they look like', value: 'How health and safety management systems work and what they look like' },
-        { display: '3 Managing risk - understanding people and process', value: 'Managing risk - understanding people and process' },
-        { display: '4 Health and safety monitoring and measuring', value: 'Health and safety monitoring and measuring' },
-        { display: '5 Physical and psychological health', value: 'Physical and psychological health' },
-        { display: '6 Musculoskeletal health', value: 'Musculoskeletal health' },
-        { display: '7 Chemical and biological agents', value: 'Chemical and biological agents' },
-        { display: '8 General workplace issues', value: 'General workplace issues' },
-        { display: '9 Work equipment', value: 'Work equipment' },
-        { display: '10 Fire', value: 'Fire' }
+        { display: '1 Why we should manage workplace health and safety', value: '1 Why we should manage workplace health and safety' },
+        { display: '2 How health and safety management systems work and what they look like', value: '2 How health and safety management systems work and what they look like' },
+        { display: '3 Managing risk - understanding people and process', value: '3 Managing risk - understanding people and process' },
+        { display: '4 Health and safety monitoring and measuring', value: '4 Health and safety monitoring and measuring' },
+        { display: '5 Physical and psychological health', value: '5 Physical and psychological health' },
+        { display: '6 Musculoskeletal health', value: '6 Musculoskeletal health' },
+        { display: '7 Chemical and biological agents', value: '7 Chemical and biological agents' },
+        { display: '8 General workplace issues', value: '8 General workplace issues' },
+        { display: '9 Work equipment', value: '9 Work equipment' },
+        { display: '10 Fire', value: '10 Fire' }
     ];
 
     // Populate Module Title dropdown
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         moduleTitleSelect.innerHTML = '<option value="">-- Select Module --</option>';
         courseModules.forEach((item) => {
             const option = document.createElement('option');
-            option.value = item.value; // Send this to the backend (no number)
+            option.value = item.value; // Now sends the value with the number
             option.textContent = item.display; // Show this in the dropdown (with number)
             moduleTitleSelect.appendChild(option);
         });
@@ -73,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const learnerName = learnerNameInput.value.trim();
         const learnerId = learnerIdInput.value;
         const attendanceDate = attendanceDateInput.value;
-        const moduleTitle = moduleTitleSelect.value; // This will now correctly be the value without the number
+        // This will now correctly be the value with the number (e.g., "1 Why we should manage...")
+        const moduleTitle = moduleTitleSelect.value; 
 
         if (!learnerName || !attendanceDate || !moduleTitle) {
             displayStatus('Please fill in Learner Name, Date, and Module Title before signing.', 'danger');
@@ -93,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     learnerName,
                     learnerId,
                     attendanceDate,
-                    moduleTitle, // This now sends the value (e.g., "Why we should manage...")
+                    moduleTitle, // This now sends the value (e.g., "1 Why we should manage...")
                     sessionNum: currentSessionNumToSign,
                     signatureData
                 })
@@ -265,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to fetch attendance status for selected learner/module (No changes needed here)
     async function fetchAttendanceForLearnerModule() {
         const learnerId = learnerIdInput.value;
-        const moduleTitle = moduleTitleSelect.value;
+        const moduleTitle = moduleTitleSelect.value; // This will also be the value with the number
 
         const learnerName = learnerNameInput.value.trim();
         let isValid = true;

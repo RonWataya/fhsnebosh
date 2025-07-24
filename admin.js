@@ -41,7 +41,7 @@ function showPage(pageId) {
 
 async function fetchTotalLearners() {
   try {
-    const response = await fetch('https://traininghealthandsafety.com:3000/api/learners/count');
+    const response = await fetch('https://portal.traininghealthandsafety.com:3000/api/learners/count');
     const data = await response.json();
     totalLearnersCard.textContent = data.total_learners;
   } catch (error) {
@@ -52,7 +52,7 @@ async function fetchTotalLearners() {
 
 async function fetchAllLearners() {
   try {
-    const response = await fetch('https://traininghealthandsafety.com:3000/api/learners');
+    const response = await fetch('https://portal.traininghealthandsafety.com:3000/api/learners');
     const learners = await response.json();
     learnersTableBody.innerHTML = '';
 
@@ -100,7 +100,7 @@ async function removeLearner(id) {
   if (!confirm('Are you sure you want to delete this learner and their attendance?')) return;
 
   try {
-    const response = await fetch(`https://traininghealthandsafety.com:3000/api/learners/${id}`, { method: 'DELETE' });
+    const response = await fetch(`https://portal.traininghealthandsafety.com:3000/api/learners/${id}`, { method: 'DELETE' });
     if (response.ok) {
       alert('Learner removed.');
       fetchAllLearners();
@@ -115,7 +115,7 @@ async function removeLearner(id) {
 
 async function fetchLearnerDetails(id) {
   try {
-    const allLearners = await (await fetch('https://traininghealthandsafety.com:3000/api/learners')).json();
+    const allLearners = await (await fetch('https://portal.traininghealthandsafety.com:3000/api/learners')).json();
     const learner = allLearners.find(l => l.learner_id == id);
 
     if (learner) {
@@ -123,7 +123,7 @@ async function fetchLearnerDetails(id) {
       modalRegistrationDate.textContent = new Date(learner.registration_date).toLocaleDateString();
     }
 
-    const response = await fetch(`https://traininghealthandsafety.com:3000/api/learners/${id}/attendance`);
+    const response = await fetch(`https://portal.traininghealthandsafety.com:3000/api/learners/${id}/attendance`);
     const records = await response.json();
 
     attendanceList.innerHTML = '';

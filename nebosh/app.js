@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayStatus(`Signing for Session ${currentSessionNumToSign}...`, 'info');
 
         try {
-            const response = await fetch('https://traininghealthandsafety.com:3000/api/sign-session', {
+            const response = await fetch('https://portal.traininghealthandsafety.com:3000/api/sign-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`https://traininghealthandsafety.com:3000/api/learners/search?query=${query}`);
+            const response = await fetch(`https://portal.traininghealthandsafety.com:3000/api/learners/search?query=${query}`);
             if (!response.ok) throw new Error('Failed to fetch learners');
             const learners = await response.json();
 
@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayStatus('Fetching existing signatures for module...', 'info');
 
         try {
-            const response = await fetch(`https://traininghealthandsafety.com:3000/api/attendance/learner-module?learnerId=${learnerId}&moduleTitle=${encodeURIComponent(moduleTitle)}`);
+            const response = await fetch(`https://portal.traininghealthandsafety.com:3000/api/attendance/learner-module?learnerId=${learnerId}&moduleTitle=${encodeURIComponent(moduleTitle)}`);
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.record_id) {
